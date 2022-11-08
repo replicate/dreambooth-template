@@ -25,19 +25,19 @@ jobs:
         run: |
           python train.py
 
-      - name: Install Cog
-        run: |
-          sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/latest/download/cog_`uname -s`_`uname -m`
-          sudo chmod +x /usr/local/bin/cog
+      # - name: Install Cog
+      #   run: |
+      #     sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/latest/download/cog_`uname -s`_`uname -m`
+      #     sudo chmod +x /usr/local/bin/cog
 
-      - name: Log in to Replicate
-        env:
-          # Find this at https://replicate.com/auth/token
-          REPLICATE_CLI_TOKEN: ${{ secrets.REPLICATE_CLI_TOKEN }}
-        run: |
-          echo $REPLICATE_CLI_TOKEN | cog login --token-stdin
+      # - name: Log in to Replicate
+      #   env:
+      #     # Find this at https://replicate.com/auth/token
+      #     REPLICATE_CLI_TOKEN: ${{ secrets.REPLICATE_CLI_TOKEN }}
+      #   run: |
+      #     echo $REPLICATE_CLI_TOKEN | cog login --token-stdin
 
-      - name: Push to Replicate
-        run: |
-          echo "TODO"
-          # cog push
+      # - name: Push to Replicate
+      #   run: |
+      #     echo "TODO"
+      #     # cog push
