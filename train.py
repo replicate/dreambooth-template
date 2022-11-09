@@ -1,7 +1,9 @@
 import json
 import mimetypes
 import os
+import urllib.request
 import zipfile
+
 
 import replicate
 
@@ -30,11 +32,17 @@ def train():
   version = model.versions.get(MODEL_VERSION)
 
   output = version.predict(
-    instance_prompt= "a photo of sks wearing a top hat",
-    class_prompt= "a photo of a person wearing a top hat",
-    instance_data="https://replicate.delivery/pbxt/HkTENyq0Ph5hzI3HgumA1HTZzycUNp8qWL2n2SnzuaHZpIP4/Archive.zip")
+    instance_prompt= "a photo of sks dog",
+    class_prompt= "a photo of a dog",
+    instance_data=open("data.zip", "rb"))
 
   print("Done training. Output:\n", json.dumps(output))
+
+  # download and unzip trained weights
+  urllib.request.urlretrieve(output, "weights.zip")
+
+  with zipfile.ZipFile("weights.zip", 'r') as zip_ref:
+    zip_ref.extractall("weights")
 
   # TODO: download generated weights
 
