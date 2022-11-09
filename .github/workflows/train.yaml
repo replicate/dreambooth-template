@@ -18,31 +18,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install replicate
 
-      # - name: Validate training data
-      #   run: |
-      #     NUM_IMAGES=$(find data -type f  -exec file {} \+ | grep -c -i 'image')
-      #     if [ "$NUM_IMAGES" == "0" ]
-      #     then
-      #       exit 1
-      #     fi
-
-      # - name: Package training data
-      #   run: |
-      #     zip -r training-data.zip data
-
-      # - name: Upload training data to GitHub Releases
-      #   id: upload_training_data
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: training-data.zip
-
-      # - name: Print public URL of training zip
-      #   run: |
-      #     echo "Output from upload_training_data step:"
-      #     echo ${{ fromJSON(steps.upload_training_data.output }}
-      #     echo "Public asset URL from upload_training_data step:"
-      #     echo ${{ fromJSON(steps.upload_training_data.outputs.assets)[0].browser_download_url }}
-
       - name: Train model
         env:
           # Find this at https://replicate.com/account
@@ -50,19 +25,19 @@ jobs:
         run: |
           python train.py
 
-      # - name: Install Cog
-      #   run: |
-      #     sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/latest/download/cog_`uname -s`_`uname -m`
-      #     sudo chmod +x /usr/local/bin/cog
+      - name: Install Cog
+        run: |
+          sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/latest/download/cog_`uname -s`_`uname -m`
+          sudo chmod +x /usr/local/bin/cog
 
-      # - name: Log in to Replicate
-      #   env:
-      #     # Find this at https://replicate.com/auth/token
-      #     REPLICATE_CLI_TOKEN: ${{ secrets.REPLICATE_CLI_TOKEN }}
-      #   run: |
-      #     echo $REPLICATE_CLI_TOKEN | cog login --token-stdin
+      - name: Log in to Replicate
+        env:
+          # Find this at https://replicate.com/auth/token
+          REPLICATE_CLI_TOKEN: ${{ secrets.REPLICATE_CLI_TOKEN }}
+        run: |
+          echo $REPLICATE_CLI_TOKEN | cog login --token-stdin
 
-      # - name: Push to Replicate
-      #   run: |
-      #     echo "TODO"
-      #     # cog push
+      - name: Push to Replicate
+        run: |
+          echo "TODO"
+          # cog push
