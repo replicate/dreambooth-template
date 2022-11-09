@@ -32,7 +32,7 @@ def train():
   output = version.predict(
     instance_prompt= "a photo of sks wearing a top hat",
     class_prompt= "a photo of a person wearing a top hat",
-    instance_data="https://zeke.github.io/files/dreambooth-training-data.zip")
+    instance_data="https://replicate.delivery/pbxt/HkTENyq0Ph5hzI3HgumA1HTZzycUNp8qWL2n2SnzuaHZpIP4/Archive.zip")
 
   print("Done training. Output:\n", json.dumps(output))
 

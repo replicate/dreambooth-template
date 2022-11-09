@@ -18,37 +18,37 @@ jobs:
           python -m pip install --upgrade pip
           pip install replicate
 
-      - name: Validate training data
-        run: |
-          NUM_IMAGES=$(find data -type f  -exec file {} \+ | grep -c -i 'image')
-          if [ "$NUM_IMAGES" == "0" ]
-          then
-            exit 1
-          fi
-
-      - name: Package training data
-        run: |
-          zip -r training-data.zip data
-
-      - name: Upload training data to GitHub Releases
-        id: upload_training_data
-        uses: softprops/action-gh-release@v1
-        with:
-          files: training-data.zip
-
-      - name: Print public URL of training zip
-        run: |
-          echo "Output from upload_training_data step:"
-          echo ${{ fromJSON(steps.upload_training_data.output }}
-          echo "Public asset URL from upload_training_data step:"
-          echo ${{ fromJSON(steps.upload_training_data.outputs.assets)[0].browser_download_url }}
-
-      # - name: Train model
-      #   env:
-      #     # Find this at https://replicate.com/account
-      #     REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      # - name: Validate training data
       #   run: |
-      #     python train.py
+      #     NUM_IMAGES=$(find data -type f  -exec file {} \+ | grep -c -i 'image')
+      #     if [ "$NUM_IMAGES" == "0" ]
+      #     then
+      #       exit 1
+      #     fi
+
+      # - name: Package training data
+      #   run: |
+      #     zip -r training-data.zip data
+
+      # - name: Upload training data to GitHub Releases
+      #   id: upload_training_data
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: training-data.zip
+
+      # - name: Print public URL of training zip
+      #   run: |
+      #     echo "Output from upload_training_data step:"
+      #     echo ${{ fromJSON(steps.upload_training_data.output }}
+      #     echo "Public asset URL from upload_training_data step:"
+      #     echo ${{ fromJSON(steps.upload_training_data.outputs.assets)[0].browser_download_url }}
+
+      - name: Train model
+        env:
+          # Find this at https://replicate.com/account
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+        run: |
+          python train.py
 
       # - name: Install Cog
       #   run: |
