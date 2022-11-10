@@ -14,11 +14,21 @@ You don't need a local GPU.
 
 ## Usage (Manually training and publishing)
 
-1. Fork and clone this repo.
-1. Add some images to the `data` folder, 3-5 is enough but you can add more.
+1. Clone this repo.
 1. Run `pip install -r requirements.txt`
 1. Grab your Replicate API key from https://replicate.com/account and set it as an environment variable: `export REPLICATE_API_TOKEN=<your-token>`.
-1. Run `python train.py`. This scripts zips the images in the data folder, runs them through the [replicate/cog-dreambooth-trainer](https://replicate.com/replicate/cog-dreambooth-trainer) model, and downloads the resulting model weights. Change the default training parameters as you wish and pass them [here](https://github.com/replicate/cog-dreambooth/blob/main/train.py#L34). With the default parameters, this will take about **20 minutes**.
+1. Run `python train.py`. This takes training images, runs them through the [replicate/cog-dreambooth-trainer](https://replicate.com/replicate/cog-dreambooth-trainer) model, and downloads the resulting model weights. You can provide images in one of three ways:
+
+   - pass a list of training images with `--images image1.jpg another_image.jpg ...`
+   - pass a zip of images with `--instance-data my-images.zip`
+   - add your images to the data/ folder
+
+   3-5 images is enough but you can add more. You also need to specify two extra parameters:
+
+   - `--instance-prompt`, the prompt identifying your training images
+   - `--class-prompt`, the prompt describing images in the same class as your training images
+
+   Note that with the default parameters this will take about **12 minutes** to run.
 1. While that's running, go create a new model at https://replicate.com/create (You'll need beta access to do this. If you don't have access, email us at team@replicate.com)
 1. Once the `train` script has finished, publish it to the model you created by running
 
