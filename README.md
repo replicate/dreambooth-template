@@ -9,7 +9,6 @@ It uses DreamBooth to train the model using your custom imagery.
 - A paid Replicate account
 - Access to the Replicate model publishing beta (https://replicate.com/join)
 - Cog and Docker installed locally
-- A machine with a GPU to build the Cog image
 
 ## Usage (Manually training and publishing)
 
