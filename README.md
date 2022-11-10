@@ -10,6 +10,8 @@ It uses DreamBooth to train the model using your custom imagery.
 - Access to the Replicate model publishing beta (https://replicate.com/join)
 - Cog and Docker installed locally
 
+You don't need a local GPU.
+
 ## Usage (Manually training and publishing)
 
 1. Fork and clone this repo.
