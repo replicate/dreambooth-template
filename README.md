@@ -20,11 +20,11 @@ You don't need a local GPU.
 1. Grab your Replicate API key from https://replicate.com/account and set it as an environment variable: `export REPLICATE_API_TOKEN=<your-token>`.
 1. Run `python train.py`. This scripts zips the images in the data folder, runs them through the [replicate/cog-dreambooth-trainer](https://replicate.com/replicate/cog-dreambooth-trainer) model, and downloads the resulting model weights. Change the default training parameters as you wish and pass them [here](https://github.com/replicate/cog-dreambooth/blob/main/train.py#L34). With the default parameters, this will take about **20 minutes**.
 1. While that's running, go create a new model at https://replicate.com/create (You'll need beta access to do this. If you don't have access, email us at team@replicate.com)
-1. Edit `cog.yaml` and set `image: r8.im/your-username/your-model`
-1. Visit https://replicate.com/auth/token to get your CLI token to publish your model.
-1. Log in using `echo "YOUR_TOKEN" | cog login --token-stdin`
-1. Edit `predict.py` and set `DREAMBOOTH_MODEL_PATH` to the path of the downloaded weights. Something like `weights/data/100`, where `100` is the checkpoint you want to use
-1. `cog push`
+1. Once the `train` script has finished, publish it to the model you created by running
+
+       python publish.py <your-username/your-model>
+
+   By default this will use the weights downloaded by the `train` script. If you want to use some other weights, you can pass them in with `--weights path/to/your/weights`.
 
 ## Usage (GitHub Actions)
 
