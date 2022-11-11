@@ -24,7 +24,7 @@ It uses DreamBooth to train the model using your custom imagery.
 1. Clone this repo.
 1. Run `pip install -r requirements.txt`
 1. Grab your Replicate API key from https://replicate.com/account and set it as an environment variable: `export REPLICATE_API_TOKEN=<your-token>`.
-1. Run `python train.py`. This takes training images, runs them through the [replicate/cog-dreambooth-trainer](https://replicate.com/replicate/cog-dreambooth-trainer) model, and downloads the resulting model weights. You can provide images in one of three ways:
+1. Run `python train.py`. This takes training images, runs them through the [replicate/dreambooth](https://replicate.com/replicate/dreambooth) model, and downloads the resulting model weights. You can provide images in one of three ways:
 
    - pass a list of training images with `--images image1.jpg another_image.jpg ...`
    - pass a zip of images with `--instance-data my-images.zip`
