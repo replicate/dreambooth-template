@@ -1,5 +1,7 @@
 # cog-dreambooth
 
+✋ Notice: This is an experimental project in early development. ✋
+
 This is a template repo for building and publishing your own custom Stable Diffusion model using Replicate.
 
 It uses DreamBooth to train the model using your custom imagery.
@@ -9,8 +11,7 @@ It uses DreamBooth to train the model using your custom imagery.
 - A paid Replicate account
 - Access to the Replicate model publishing beta (https://replicate.com/join)
 - Cog and Docker installed locally
-
-You don't need a local GPU.
+- You _don't_ need a local GPU
 
 ## Usage (Manually training and publishing)
 
