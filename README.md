@@ -1,5 +1,3 @@
-# cog-dreambooth
-
 <img src="https://i.imgflip.com/70fpy9.jpg">
 
 ---
