@@ -14,7 +14,7 @@ import zipfile
 import replicate
 
 MODEL_NAME = "replicate/dreambooth"
-MODEL_VERSION = "aed4c97896acbabfdc98f4110901f97319f93d052d7474e8a8178277af11677c"
+MODEL_VERSION = "053b31c5f2a2648a37485ca0f0d543aa22c082cf4fdfceee689d7bfcce2b4013"
 
 
 def train(class_prompt, instance_prompt, training_data):
