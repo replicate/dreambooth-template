@@ -26,7 +26,7 @@ It uses [replicate.com/replicate/dreambooth](https://replicate.com/replicate/dre
 
    - pass a list of training images with `--images image1.jpg another_image.jpg ...`
    - pass a zip of images with `--instance-data my-images.zip`
-   - add your images to the data/ folder
+   - add your images to the data/ folder. (If you use this option, delete the default cute puppy pictures in the folder first! 🐾)
 
    3-5 images is enough but you can add more. You also need to specify two extra parameters:
 
