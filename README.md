@@ -8,7 +8,7 @@
 
 This is a template repo for building and publishing your own custom Stable Diffusion model using Replicate.
 
-It uses DreamBooth to train the model using your custom imagery.
+It uses [replicate.com/replicate/dreambooth](https://replicate.com/replicate/dreambooth) to train the model using your custom imagery.
 
 ## Preqrequisites
 
