@@ -2,9 +2,9 @@
 
 ---
 
-**✋ Notice: This is an experimental project in early development. ✋**
+# DreamBooth Template
 
----
+**✋ Notice: This is an experimental project in early development. ✋**
 
 This is a template repo for building and publishing your own custom Stable Diffusion model using Replicate.
 
