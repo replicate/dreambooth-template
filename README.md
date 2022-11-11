@@ -1,6 +1,12 @@
 # cog-dreambooth
 
-✋ Notice: This is an experimental project in early development. ✋
+<img src="https://i.imgflip.com/70fpy9.jpg">
+
+---
+
+**✋ Notice: This is an experimental project in early development. ✋**
+
+---
 
 This is a template repo for building and publishing your own custom Stable Diffusion model using Replicate.
 
