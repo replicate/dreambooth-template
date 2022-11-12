@@ -64,10 +64,10 @@ def train(class_prompt, instance_prompt, training_data):
         print(f"Training failed: {prediction.error}")
         exit(1)
 
-    print("Done training. Output:\n", json.dumps(output))
+    print("Done training. Output:\n", json.dumps(prediction))
 
     # download and unzip trained weights
-    urllib.request.urlretrieve(output, "weights.zip")
+    urllib.request.urlretrieve(prediction, "weights.zip")
 
     with zipfile.ZipFile("weights.zip", "r") as zip_ref:
         zip_ref.extractall("weights")
