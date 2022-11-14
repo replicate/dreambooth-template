@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from pathlib import Path
+import shutil
 from typing import List
 import io
 import json
@@ -64,10 +65,14 @@ def train(class_prompt, instance_prompt, training_data):
         print(f"Training failed: {prediction.error}")
         exit(1)
 
-    print("Done training. Output:\n", json.dumps(prediction))
+    weights_url = prediction.output
+    print(f"Done training. Weights saved at: {weights_url}")
 
     # download and unzip trained weights
-    urllib.request.urlretrieve(prediction, "weights.zip")
+    # need to set user-agent header to avoid 403
+    req = urllib.request.Request(weights_url, headers={"User-Agent": "python"})
+    with urllib.request.urlopen(req) as response, open("weights.zip", "wb") as out_file:
+        shutil.copyfileobj(response, out_file)
 
     with zipfile.ZipFile("weights.zip", "r") as zip_ref:
         zip_ref.extractall("weights")
