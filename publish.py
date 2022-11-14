@@ -49,7 +49,7 @@ def publish(model_name: str, weights: Path) -> None:
 
 
 def _cog_installed() -> bool:
-    return _run_command(["command", "-v", "cog"])
+    return _run_command(["cog", "--help"])
 
 
 def _cog_login(api_token: str) -> None:
@@ -79,7 +79,7 @@ def _run_command(*args, **kwargs) -> bool:
     try:
         check_output(*args, **kwargs)
         return True
-    except CalledProcessError:
+    except (CalledProcessError, FileNotFoundError):
         return False
 
 
