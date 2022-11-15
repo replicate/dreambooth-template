@@ -37,7 +37,7 @@ It uses [replicate.com/replicate/dreambooth](https://replicate.com/replicate/dre
 
 ## Publishing the model
 
-The training process creates, downloads, and extracts trained weights for your custom model. If you've got a machine with a GPU, you can run your custom model locally using `cog predict`, but you can also publish it to Replicate so that anyone can run it:
+The training process creates, downloads, and extracts trained weights for your custom model. If you've got a machine with a GPU, you can run your custom model locally using `cog predict`, but you can also publish it to Replicate so that anyone can run it from the web or using Replicate's API:
 
 1. Create a new model at https://replicate.com/create (You'll need beta access to do this. If you don't have access, you can [join the waitlist](https://replicate.com/join).)
 1. Once the `train` script has finished, publish it to the model you created by running
