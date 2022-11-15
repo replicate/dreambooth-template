@@ -43,4 +43,4 @@ It uses [replicate.com/replicate/dreambooth](https://replicate.com/replicate/dre
 
 ## Usage (GitHub Actions)
 
-WIP. See [.github/workflows/train.yaml]([.github/workflows/train.yaml])
+WIP. See [.github/workflows/train.yaml](.github/workflows/train.yaml)
