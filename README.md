@@ -6,18 +6,18 @@
 
 **✋ Notice: This is an experimental project in early development. ✋**
 
-This is a template repo for building and publishing your own custom Stable Diffusion model using Replicate.
+This is a template repo for training and publishing your own custom Stable Diffusion model using Replicate.
 
 It uses [replicate.com/replicate/dreambooth](https://replicate.com/replicate/dreambooth) to train the model using your custom imagery.
 
 ## Preqrequisites
 
 - A paid Replicate account
-- Access to the Replicate model publishing beta (https://replicate.com/join)
 - Cog and Docker installed locally
+- Access to the Replicate [model publishing beta](https://replicate.com/join)
 - You _don't_ need a local GPU
 
-## Usage (Manually training and publishing)
+## Training the model
 
 1. Clone this repo.
 1. Run `pip install -r requirements.txt`
@@ -34,13 +34,14 @@ It uses [replicate.com/replicate/dreambooth](https://replicate.com/replicate/dre
    - `--class-prompt`, the prompt describing images in the same class as your training images
 
    Note that with the default parameters this will take about **12 minutes** to run.
-1. While that's running, go create a new model at https://replicate.com/create (You'll need beta access to do this. If you don't have access, email us at team@replicate.com)
+
+## Publishing the model
+
+The training process creates, downloads, and extracts trained weights for your custom model. If you've got a machine with a GPU, you can run your custom model locally using `cog predict`, but you can also publish it to Replicate so that anyone can run it from the web or using Replicate's API:
+
+1. Create a new model at https://replicate.com/create (You'll need beta access to do this. If you don't have access, you can [join the waitlist](https://replicate.com/join).)
 1. Once the `train` script has finished, publish it to the model you created by running
 
        python publish.py <your-username/your-model>
 
    By default this will use the weights downloaded by the `train` script. If you want to use some other weights, you can pass them in with `--weights path/to/your/weights`.
-
-## Usage (GitHub Actions)
-
-WIP. See [.github/workflows/train.yaml](.github/workflows/train.yaml)
