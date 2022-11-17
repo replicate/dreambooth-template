@@ -7,7 +7,7 @@ from pytorch_lightning import seed_everything
 from cog import BasePredictor, Input, Path
 
 
-DREAMBOOTH_MODEL_PATH = "weights/500"
+DREAMBOOTH_MODEL_PATH = "weights"
 
 
 class Predictor(BasePredictor):
