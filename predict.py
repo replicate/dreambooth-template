@@ -33,7 +33,7 @@ class Predictor(BasePredictor):
         self,
         prompt: str = Input(
             description="Input prompt",
-            default="a magical princess with golden hair, archer style",
+            default="a cjw cat in a bucket",
         ),
         width: int = Input(
             description="Width of output image. Maximum size is 1024x768 or 768x1024 because of memory limits",
