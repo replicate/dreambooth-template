@@ -1,10 +1,10 @@
-<img src="https://i.imgflip.com/70fpy9.jpg">
-
----
-
 # DreamBooth Template
 
-**✋ Notice: This is an experimental project in early development. ✋**
+🦜 Hey! We built an API that automates the whole process outlined below. To get started using that new API, check out the blog post at [replicate.com/blog/dreambooth-api]([https://replicate.com/blog/dreambooth-api])
+
+If you wish to use the old manual method, you can continue reading below.
+
+---
 
 This is a template repo for training and publishing your own custom Stable Diffusion model using Replicate.
 
