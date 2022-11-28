@@ -7,37 +7,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.7"
-
-      - name: Install Python dependencies
+      - name: Zip training data
         run: |
-          python -m pip install --upgrade pip
-          pip install replicate
-
-      - name: Train model
-        env:
-          # Find this at https://replicate.com/account
-          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          zip -r data.zip data
+      
+      - name: Upload training data
+        id: upload-training-data
+        uses: sergeysova/jq-action@v2
         run: |
-          python train.py
+          RESPONSE=$(curl -X POST -H "Authorization: Token ${{ secrets.REPLICATE_API_TOKEN }}" https://dreambooth-api-experimental.replicate.com/v1/upload/data.zip)
+          curl -X PUT -H "Content-Type: application/zip" --upload-file data.zip "$(jq -r ".upload_url" <<< "$RESPONSE")"
+          echo "INSTANCE_DATA_URL=$(jq -r '.serving_url' <<< $RESPONSE)" >> $GITHUB_OUTPUT
 
-      - name: Install Cog
+      - name: Start training
         run: |
-          sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/latest/download/cog_`uname -s`_`uname -m`
-          sudo chmod +x /usr/local/bin/cog
-
-      - name: Log in to Replicate
-        env:
-          # Find this at https://replicate.com/account
-          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
-        run: |
-          echo $REPLICATE_API_TOKEN | cog login --token-stdin
-
-      - name: Push to Replicate
-        run: |
-          echo "TODO"
-          # cog push
+          curl -X POST \
+          -H "Authorization: Token ${{ secrets.REPLICATE_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+                  "input": {
+                      "instance_prompt": "a photo of a zzz person",
+                      "class_prompt": "a photo of a person",
+                      "instance_data": "${{ steps.upload-training-data.outputs.INSTANCE_DATA_URL }}",
+                      "max_train_steps": 100 # TODO: set to 2000
+                  },
+                  "model": "zeke/zekebooth"
+              }' \
+          https://dreambooth-api-experimental.replicate.com/v1/trainings
