@@ -23,7 +23,6 @@ class Predictor(BasePredictor):
         self.pipe = StableDiffusionPipeline.from_pretrained(
             DREAMBOOTH_MODEL_PATH,
             scheduler=scheduler,
-            safety_checker=None,
             torch_dtype=torch.float16,
         ).to("cuda")
 
