@@ -18,6 +18,7 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 )
 from transformers import CLIPFeatureExtractor
 
+
 SAFETY_MODEL_CACHE = "diffusers-cache"
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 
@@ -43,18 +44,18 @@ class Predictor(BasePredictor):
         safety_checker = StableDiffusionSafetyChecker.from_pretrained(
             SAFETY_MODEL_ID,
             cache_dir=SAFETY_MODEL_CACHE,
+            torch_dtype=torch.float16,
             local_files_only=True,
         ).to("cuda")
-        # feature_extractor = CLIPFeatureExtractor.from_pretrained(
-        #     "openai/clip-vit-base-patch32",
-        #     cache_dir=SAFETY_MODEL_CACHE,
-        #     local_files_only=True,
-        # )
+        feature_extractor = CLIPFeatureExtractor.from_pretrained(
+            "openai/clip-vit-base-patch32", cache_dir=SAFETY_MODEL_CACHE
+        )
+
         print("Loading SD pipeline...")
         self.pipe = StableDiffusionPipeline.from_pretrained(
             "weights",
             safety_checker=safety_checker,
-            # feature_extractor=feature_extractor,
+            feature_extractor=feature_extractor,
             torch_dtype=torch.float16,
         ).to("cuda")
 
