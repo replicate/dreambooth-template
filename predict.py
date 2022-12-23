@@ -5,12 +5,21 @@ from typing import List
 import torch
 from cog import BasePredictor, Input, Path
 from diffusers import (
-    DDIMScheduler,
-    DPMSolverMultistepScheduler,
-    EulerDiscreteScheduler,
     StableDiffusionPipeline,
+    PNDMScheduler,
+    LMSDiscreteScheduler,
+    DDIMScheduler,
+    EulerDiscreteScheduler,
+    EulerAncestralDiscreteScheduler,
+    DPMSolverMultistepScheduler,
 )
+from diffusers.pipelines.stable_diffusion.safety_checker import (
+    StableDiffusionSafetyChecker,
+)
+from transformers import CLIPFeatureExtractor
 
+SAFETY_MODEL_CACHE = "diffusers-cache"
+SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 
 if not os.path.exists("weights"):
     raise ValueError("dreambooth weights not found")
@@ -30,9 +39,22 @@ except:
 class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
-        print("Loading pipeline...")
+        print("Loading Safety pipeline...")
+        safety_checker = StableDiffusionSafetyChecker.from_pretrained(
+            SAFETY_MODEL_ID,
+            cache_dir=SAFETY_MODEL_CACHE,
+            local_files_only=True,
+        ).to("cuda")
+        # feature_extractor = CLIPFeatureExtractor.from_pretrained(
+        #     "openai/clip-vit-base-patch32",
+        #     cache_dir=SAFETY_MODEL_CACHE,
+        #     local_files_only=True,
+        # )
+        print("Loading SD pipeline...")
         self.pipe = StableDiffusionPipeline.from_pretrained(
             "weights",
+            safety_checker=safety_checker,
+            # feature_extractor=feature_extractor,
             torch_dtype=torch.float16,
         ).to("cuda")
 
@@ -79,6 +101,9 @@ class Predictor(BasePredictor):
                 "DDIM",
                 "K_EULER",
                 "DPMSolverMultistep",
+                "K_EULER_ANCESTRAL",
+                "PNDM",
+                "KLMS",
             ],
             description="Choose a scheduler",
         ),
@@ -113,16 +138,25 @@ class Predictor(BasePredictor):
 
         output_paths = []
         for i, sample in enumerate(output.images):
-            output_path = f"/tmp/out-{i}.png"
-            sample.save(output_path)
-            output_paths.append(Path(output_path))
+            if output.nsfw_content_detected and not output.nsfw_content_detected[i]:
+                output_path = f"/tmp/out-{i}.png"
+                sample.save(output_path)
+                output_paths.append(Path(output_path))
+
+        if len(output_paths) == 0:
+            raise Exception(
+                f"NSFW content detected. Try running it again, or try a different prompt."
+            )
 
         return output_paths
 
 
 def make_scheduler(name, config):
     return {
+        "PNDM": PNDMScheduler.from_config(config),
+        "KLMS": LMSDiscreteScheduler.from_config(config),
         "DDIM": DDIMScheduler.from_config(config),
         "K_EULER": EulerDiscreteScheduler.from_config(config),
+        "K_EULER_ANCESTRAL": EulerAncestralDiscreteScheduler.from_config(config),
         "DPMSolverMultistep": DPMSolverMultistepScheduler.from_config(config),
     }[name]
