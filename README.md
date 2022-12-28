@@ -4,15 +4,14 @@ This is the template used by [replicate.com dreambooth api](https://replicate.co
 
 This template is based on [cog-stable-diffusion](https://github.com/replicate/cog-stable-diffusion) which uses diffusers.
 
-## How to use this template
+## Usage
 
-Ignore this template and use our [replicate.com dreambooth api](https://replicate.com/blog/dreambooth-api/).  It will generate an HTTP API for you generate images from your model.
-
-## How to use this template locally
+This template is primarily intended for use by [Replicate's DreamBooth API](https://replicate.com/blog/dreambooth-api), which is what you probably want to use to train and publish your own model.
 
 If you really want to use this template locally, you can do so by following these steps:
 
 1. Generate some weights, put them in `weights/` (use our trainer or your own)
-2. Install [cog](https://github.com/replicate/cog) & docker
-3. Build `cog build`
-4. Predict `cog predict -i prompt="photo of zzz" -i seed=42` ...
+2. Download NSFW safety_checker weights using `script/download-weights`
+3. Install [cog](https://github.com/replicate/cog) & docker
+4. Build `cog build`
+5. Predict `cog predict -i prompt="photo of zzz" -i seed=42` ...
