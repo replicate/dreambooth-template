@@ -28,12 +28,16 @@ if not os.path.exists("weights"):
 DEFAULT_HEIGHT = 512
 DEFAULT_WIDTH = 512
 DEFAULT_SCHEDULER = "DDIM"
+
 try:
     with open("weights/args.json") as f:
         args = json.load(f)
         if args.get("instance_prompt"):
             DEFAULT_PROMPT = args["instance_prompt"]
 except:
+    DEFAULT_PROMPT = None
+
+if not DEFAULT_PROMPT:
     DEFAULT_PROMPT = "a photo of an astronaut riding a horse on mars"
 
 
