@@ -41,7 +41,7 @@ class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
         print("Loading Safety pipeline...")
-        safety_checker = StableDiffusionSafetyChecker.from_pretrained(
+        self.safety_checker = StableDiffusionSafetyChecker.from_pretrained(
             SAFETY_MODEL_ID,
             cache_dir=SAFETY_MODEL_CACHE,
             torch_dtype=torch.float16,
@@ -54,7 +54,7 @@ class Predictor(BasePredictor):
         print("Loading SD pipeline...")
         self.pipe = StableDiffusionPipeline.from_pretrained(
             "weights",
-            safety_checker=safety_checker,
+            safety_checker=self.safety_checker,
             feature_extractor=feature_extractor,
             torch_dtype=torch.float16,
         ).to("cuda")
@@ -111,6 +111,9 @@ class Predictor(BasePredictor):
         seed: int = Input(
             description="Random seed. Leave blank to randomize the seed", default=None
         ),
+        disable_safety_check: bool = Input(
+            description="Disable safety check. Use at your own risk!", default=False
+        ),
     ) -> List[Path]:
         """Run a single prediction on the model"""
         if seed is None:
@@ -125,6 +128,12 @@ class Predictor(BasePredictor):
         self.pipe.scheduler = make_scheduler(scheduler, self.pipe.scheduler.config)
 
         generator = torch.Generator("cuda").manual_seed(seed)
+
+        if disable_safety_check:
+            self.pipe.safety_checker = None
+        else:
+            self.pipe.safety_checker = self.safety_checker
+
         output = self.pipe(
             prompt=[prompt] * num_outputs if prompt is not None else None,
             negative_prompt=[negative_prompt] * num_outputs
@@ -139,10 +148,12 @@ class Predictor(BasePredictor):
 
         output_paths = []
         for i, sample in enumerate(output.images):
-            if output.nsfw_content_detected and not output.nsfw_content_detected[i]:
-                output_path = f"/tmp/out-{i}.png"
-                sample.save(output_path)
-                output_paths.append(Path(output_path))
+            if output.nsfw_content_detected and output.nsfw_content_detected[i]:
+                continue
+
+            output_path = f"/tmp/out-{i}.png"
+            sample.save(output_path)
+            output_paths.append(Path(output_path))
 
         if len(output_paths) == 0:
             raise Exception(
