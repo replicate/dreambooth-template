@@ -30,7 +30,7 @@ DEFAULT_WIDTH = 512
 DEFAULT_SCHEDULER = "DDIM"
 
 # grab instance_prompt from weights,
-# unless empty string or not existant
+# unless empty string or not existent
 
 DEFAULT_PROMPT = None
 try:
