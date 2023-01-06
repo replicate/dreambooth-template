@@ -6,6 +6,7 @@ import torch
 from cog import BasePredictor, Input, Path
 from diffusers import (
     StableDiffusionPipeline,
+    StableDiffusionImg2ImgPipeline,
     PNDMScheduler,
     LMSDiscreteScheduler,
     DDIMScheduler,
@@ -16,6 +17,7 @@ from diffusers import (
 from diffusers.pipelines.stable_diffusion.safety_checker import (
     StableDiffusionSafetyChecker,
 )
+from PIL import Image
 from transformers import CLIPFeatureExtractor
 
 
@@ -58,11 +60,21 @@ class Predictor(BasePredictor):
         )
 
         print("Loading SD pipeline...")
-        self.pipe = StableDiffusionPipeline.from_pretrained(
+        self.txt2img_pipe = StableDiffusionPipeline.from_pretrained(
             "weights",
             safety_checker=self.safety_checker,
             feature_extractor=feature_extractor,
             torch_dtype=torch.float16,
+        ).to("cuda")
+
+        self.img2img_pipe = StableDiffusionImg2ImgPipeline(
+            vae=self.txt2img_pipe.vae,
+            text_encoder=self.txt2img_pipe.text_encoder,
+            tokenizer=self.txt2img_pipe.tokenizer,
+            unet=self.txt2img_pipe.unet,
+            scheduler=self.txt2img_pipe.scheduler,
+            safety_checker=self.txt2img_pipe.safety_checker,
+            feature_extractor=self.txt2img_pipe.feature_extractor,
         ).to("cuda")
 
     @torch.inference_mode()
@@ -75,6 +87,10 @@ class Predictor(BasePredictor):
         negative_prompt: str = Input(
             description="Specify things to not see in the output",
             default=None,
+        ),
+        image: Path = Input(
+            description="A starting image from which to generate variations (aka 'img2img'). If this input is set, the `width` and `height` inputs are ignored and the output will have the same dimensions as the input image."
+            default=None
         ),
         width: int = Input(
             description="Width of output image. Maximum size is 1024x768 or 768x1024 because of memory limits",
@@ -131,25 +147,39 @@ class Predictor(BasePredictor):
                 "Maximum size is 1024x768 or 768x1024 pixels, because of memory limits. Please select a lower width or height."
             )
 
-        self.pipe.scheduler = make_scheduler(scheduler, self.pipe.scheduler.config)
+        if image is not None:
+            print("using img2img")
+            pipe = self.img2img_pipe
+            extra_kwargs = {
+                "image": Image.open(image).convert("RGB"),
+                "strength": prompt_strength,
+            }
+        else:
+            print("using txt2img")
+            pipe = self.txt2img_pipe
+            extra_kwargs = {
+                "width": width,
+                "height": height,
+            }
+
+        pipe.scheduler = make_scheduler(scheduler, pipe.scheduler.config)
 
         generator = torch.Generator("cuda").manual_seed(seed)
 
         if disable_safety_check:
-            self.pipe.safety_checker = None
+            pipe.safety_checker = None
         else:
-            self.pipe.safety_checker = self.safety_checker
+            pipe.safety_checker = self.safety_checker
 
-        output = self.pipe(
+        output = pipe(
             prompt=[prompt] * num_outputs if prompt is not None else None,
             negative_prompt=[negative_prompt] * num_outputs
             if negative_prompt is not None
             else None,
-            width=width,
-            height=height,
             guidance_scale=guidance_scale,
             generator=generator,
             num_inference_steps=num_inference_steps,
+            **extra_kwargs,
         )
 
         output_paths = []
