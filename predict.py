@@ -89,8 +89,8 @@ class Predictor(BasePredictor):
             default=None,
         ),
         image: Path = Input(
-            description="A starting image from which to generate variations (aka 'img2img'). If this input is set, the `width` and `height` inputs are ignored and the output will have the same dimensions as the input image."
-            default=None
+            description="A starting image from which to generate variations (aka 'img2img'). If this input is set, the `width` and `height` inputs are ignored and the output will have the same dimensions as the input image.",
+            default=None,
         ),
         width: int = Input(
             description="Width of output image. Maximum size is 1024x768 or 768x1024 because of memory limits",
