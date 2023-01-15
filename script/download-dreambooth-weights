@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o xtrace
+
+# Download weights from url given as arguments
+
+# step 0: delete weights/
+rm -rf weights
+
+# step 1: download url from arguments
+time curl -L $1 -o weights.zip
+
+# step 2: unzip weights.zip into weights/
+mkdir weights
+time unzip weights.zip -d weights
+
+# step 3: delete weights.zip
+rm weights.zip

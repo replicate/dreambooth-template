@@ -1,5 +1,7 @@
 import json
 import os
+import subprocess
+import time
 from typing import List
 
 import torch
@@ -24,25 +26,10 @@ from transformers import CLIPFeatureExtractor
 SAFETY_MODEL_CACHE = "diffusers-cache"
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 
-if not os.path.exists("weights"):
-    raise ValueError("dreambooth weights not found")
-
 DEFAULT_HEIGHT = 512
 DEFAULT_WIDTH = 512
 DEFAULT_SCHEDULER = "DDIM"
-
-# grab instance_prompt from weights,
-# unless empty string or not existent
-
-DEFAULT_PROMPT = None
-try:
-    with open("weights/args.json") as f:
-        args = json.load(f)
-        DEFAULT_PROMPT = args["instance_prompt"]
-except:
-    pass
-if not DEFAULT_PROMPT:
-    DEFAULT_PROMPT = "a photo of an astronaut riding a horse on mars"
+DEFAULT_PROMPT = "a photo of an astronaut riding a horse on mars"
 
 
 class Predictor(BasePredictor):
@@ -55,31 +42,70 @@ class Predictor(BasePredictor):
             torch_dtype=torch.float16,
             local_files_only=True,
         ).to("cuda")
-        feature_extractor = CLIPFeatureExtractor.from_pretrained(
+        self.feature_extractor = CLIPFeatureExtractor.from_pretrained(
             "openai/clip-vit-base-patch32", cache_dir=SAFETY_MODEL_CACHE
         )
 
-        print("Loading SD pipeline...")
-        self.txt2img_pipe = StableDiffusionPipeline.from_pretrained(
-            "weights",
-            safety_checker=self.safety_checker,
-            feature_extractor=feature_extractor,
-            torch_dtype=torch.float16,
-        ).to("cuda")
+        self.txt2img_pipe = None
+        self.img2img_pipe = None
+        self.weights = None
 
-        self.img2img_pipe = StableDiffusionImg2ImgPipeline(
-            vae=self.txt2img_pipe.vae,
-            text_encoder=self.txt2img_pipe.text_encoder,
-            tokenizer=self.txt2img_pipe.tokenizer,
-            unet=self.txt2img_pipe.unet,
-            scheduler=self.txt2img_pipe.scheduler,
-            safety_checker=self.txt2img_pipe.safety_checker,
-            feature_extractor=self.txt2img_pipe.feature_extractor,
-        ).to("cuda")
+    def load_weights(self, weights):
+
+        if weights == self.weights:
+            return True
+
+        # FIXME(ja): is this a CUDA memory leak?
+        # should we unload the weights - or just load weights into existing pipeline?
+        # every time we load weights, we get a new CUDA memory leak probably if already existing weights
+        if weights is None:
+            self.txt2img_pipe = None
+            self.img2img_pipe = None
+
+        try:
+            out = subprocess.check_output(["pwd"])
+            print(out)
+            out = subprocess.check_output(["ls", "script"])
+            print(out)
+            start = time.time()
+            subprocess.check_output(["/bin/bash", "script/download-weights", weights])
+            print("Downloaded weights in", time.time() - start)
+
+            start = time.time()
+            self.txt2img_pipe = StableDiffusionPipeline.from_pretrained(
+                "weights/",
+                safety_checker=self.safety_checker,
+                feature_extractor=self.feature_extractor,
+                torch_dtype=torch.float16,
+            ).to("cuda")
+            print("Loaded txt2img pipeline in", time.time() - start)
+
+            start = time.time()
+            self.img2img_pipe = StableDiffusionImg2ImgPipeline(
+                vae=self.txt2img_pipe.vae,
+                text_encoder=self.txt2img_pipe.text_encoder,
+                tokenizer=self.txt2img_pipe.tokenizer,
+                unet=self.txt2img_pipe.unet,
+                scheduler=self.txt2img_pipe.scheduler,
+                safety_checker=self.txt2img_pipe.safety_checker,
+                feature_extractor=self.txt2img_pipe.feature_extractor,
+            ).to("cuda")
+            print("Loaded img2img pipeline in", time.time() - start)
+
+            self.weights = weights
+        except Exception as e:
+            print(e)
+            return False
+        return True
+
+        # print("Loading SD pipeline...")
 
     @torch.inference_mode()
     def predict(
         self,
+        weights: Path = Input(
+            description="The weights.zip to use for the model", default=None
+        ),
         prompt: str = Input(
             description="Input prompt",
             default=DEFAULT_PROMPT,
@@ -146,6 +172,9 @@ class Predictor(BasePredictor):
             raise ValueError(
                 "Maximum size is 1024x768 or 768x1024 pixels, because of memory limits. Please select a lower width or height."
             )
+
+        if not self.load_weights(weights):
+            raise ValueError("Could not load weights")
 
         if image is not None:
             print("using img2img")
