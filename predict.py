@@ -1,6 +1,8 @@
 import json
 import os
-from typing import List
+import subprocess
+import time
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 from cog import BasePredictor, Input, Path
@@ -21,11 +23,9 @@ from PIL import Image
 from transformers import CLIPFeatureExtractor
 
 
-SAFETY_MODEL_CACHE = "diffusers-cache"
-SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 
-if not os.path.exists("weights"):
-    raise ValueError("dreambooth weights not found")
+SAFETY_MODEL_CACHE = "diffusers-cache"
+SAFETY_MODEL_URL = 'https://weights.replicate.delivery/default/dreambooth-safety-checker.tar'
 
 DEFAULT_HEIGHT = 512
 DEFAULT_WIDTH = 512
@@ -45,18 +45,38 @@ if not DEFAULT_PROMPT:
     DEFAULT_PROMPT = "a photo of an astronaut riding a horse on mars"
 
 
+def download_weights(url, dest):
+    start = time.time()
+    print("downloading url: ", url)
+    print("downloading to: ", dest)
+    subprocess.check_call(["pget", "-x", str(url), dest], close_fds=False)
+    print("downloading took: ", time.time() - start)
+
+
 class Predictor(BasePredictor):
     def setup(self):
+
+        weights = os.environ.get('DREAMBOOTH_WEIGHTS')
+
+        if weights is None:
+            self.tuned = False
+            return
+        
+        if not os.path.exists("/src/weights"):
+            download_weights(weights, "/src/weights")
+        
+        if not os.path.exists(SAFETY_MODEL_CACHE):
+            download_weights(SAFETY_MODEL_URL, SAFETY_MODEL_CACHE)
+
         """Load the model into memory to make running multiple predictions efficient"""
         print("Loading Safety pipeline...")
         self.safety_checker = StableDiffusionSafetyChecker.from_pretrained(
-            SAFETY_MODEL_ID,
-            cache_dir=SAFETY_MODEL_CACHE,
+            os.path.join(SAFETY_MODEL_CACHE, "stable-diffusion-safety-checker"),
             torch_dtype=torch.float16,
             local_files_only=True,
         ).to("cuda")
         feature_extractor = CLIPFeatureExtractor.from_pretrained(
-            "openai/clip-vit-base-patch32", cache_dir=SAFETY_MODEL_CACHE
+            os.path.join(SAFETY_MODEL_CACHE, "clip-vit-base-patch32")
         )
 
         print("Loading SD pipeline...")
@@ -76,6 +96,8 @@ class Predictor(BasePredictor):
             safety_checker=self.txt2img_pipe.safety_checker,
             feature_extractor=self.txt2img_pipe.feature_extractor,
         ).to("cuda")
+
+        self.tuned = True
 
     @torch.inference_mode()
     def predict(
@@ -138,6 +160,12 @@ class Predictor(BasePredictor):
         ),
     ) -> List[Path]:
         """Run a single prediction on the model"""
+
+        if not self.tuned:
+            raise ValueError(
+                "This is a template model."
+            )
+
         if seed is None:
             seed = int.from_bytes(os.urandom(2), "big")
         print(f"Using seed: {seed}")
